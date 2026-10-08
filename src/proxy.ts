@@ -6,5 +6,6 @@ const { auth } = NextAuth({ ...authConfig, trustHost: true });
 export default auth;
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  // 不需登入：NextAuth、公開分享頁 /s/…
+  matcher: ["/((?!api/auth|s/|_next/static|_next/image|favicon.ico).*)"],
 };

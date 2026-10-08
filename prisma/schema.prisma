@@ -37,6 +37,8 @@ model Document {
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   tags       Tag[]
   pinned     Boolean   @default(false)
+  // 公開唯讀分享連結的 token；null 表示未分享
+  shareToken String?   @unique
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 

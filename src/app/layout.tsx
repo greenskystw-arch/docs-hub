@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTheme } from "@/lib/data";
 import "./globals.css";
 import "./app.css";
+import "./share-print.css";
 
 export const metadata: Metadata = {
   title: "文檔庫",

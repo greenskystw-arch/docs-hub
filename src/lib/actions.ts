@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
@@ -84,6 +85,28 @@ export async function togglePin(id: string, pinned: boolean) {
   const doc = await prisma.document.findUnique({ where: { id }, select: { updatedAt: true } });
   if (!doc) return;
   await prisma.document.update({ where: { id }, data: { pinned, updatedAt: doc.updatedAt } });
+  refresh();
+}
+
+/* ===== 分享（公開唯讀連結） ===== */
+
+export async function enableShare(id: string): Promise<{ token?: string }> {
+  await requireUser();
+  const doc = await prisma.document.findUnique({ where: { id }, select: { shareToken: true, updatedAt: true } });
+  if (!doc) return {};
+  if (doc.shareToken) return { token: doc.shareToken };
+  const token = randomBytes(18).toString("base64url");
+  // 開啟分享不算內容修改，保留原本的更新時間
+  await prisma.document.update({ where: { id }, data: { shareToken: token, updatedAt: doc.updatedAt } });
+  refresh();
+  return { token };
+}
+
+export async function disableShare(id: string) {
+  await requireUser();
+  const doc = await prisma.document.findUnique({ where: { id }, select: { updatedAt: true } });
+  if (!doc) return;
+  await prisma.document.update({ where: { id }, data: { shareToken: null, updatedAt: doc.updatedAt } });
   refresh();
 }
 

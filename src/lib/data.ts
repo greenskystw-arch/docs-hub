@@ -61,6 +61,16 @@ export async function loadDocument(id: string) {
   });
 }
 
+// 公開分享頁用：只回傳標題、內容與日期
+export async function loadSharedDocument(token: string) {
+  await connection();
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(token)) return null;
+  return prisma.document.findUnique({
+    where: { shareToken: token },
+    select: { title: true, content: true, createdAt: true, updatedAt: true },
+  });
+}
+
 export async function countDocs() {
   await connection();
   const [all, none] = await Promise.all([

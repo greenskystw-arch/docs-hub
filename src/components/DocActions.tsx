@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { PrintButton } from "@/components/PrintButton";
+import { ShareMenu } from "@/components/ShareMenu";
 import { deleteDocument, togglePin } from "@/lib/actions";
 
-export function DocActions({ id, pinned, markdown }: { id: string; pinned: boolean; markdown: string }) {
+type Props = { id: string; title: string; pinned: boolean; markdown: string; shareToken: string | null };
+
+export function DocActions({ id, title, pinned, markdown, shareToken }: Props) {
   const [pending, startTransition] = useTransition();
   const [toast, setToast] = useState("");
 
@@ -35,6 +39,8 @@ export function DocActions({ id, pinned, markdown }: { id: string; pinned: boole
         複製
       </button>
       <a href={`/docs/${id}/download`} className="btn plain small">⬇ .md</a>
+      <PrintButton title={title} />
+      <ShareMenu id={id} title={title} token={shareToken} />
       <button
         type="button"
         className="btn danger small"

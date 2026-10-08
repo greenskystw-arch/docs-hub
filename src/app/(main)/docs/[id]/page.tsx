@@ -19,7 +19,7 @@ export default async function DocPage({ params }: PageProps<"/docs/[id]">) {
       <article className="card">
         <div className="doc-head">
           <h1>{doc.pinned && <span className="pin">📌 </span>}{doc.title}</h1>
-          <DocActions id={doc.id} pinned={doc.pinned} markdown={doc.content} />
+          <DocActions id={doc.id} title={doc.title} pinned={doc.pinned} markdown={doc.content} shareToken={doc.shareToken} />
         </div>
         <div className="doc-meta">
           {doc.category ? (
