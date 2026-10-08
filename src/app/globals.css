@@ -1,0 +1,44 @@
+/* ===== 配色（以 html[data-theme] 切換） ===== */
+:root,
+[data-theme="mint"] {
+  --bg: #f4f6f8; --card: #ffffff; --ink: #1c2530; --muted: #6b7785; --line: #e3e8ee;
+  --accent: #2f7d6d; --accent-soft: #e3f2ee; --warn: #c2410c; --warn-soft: #fff1e8;
+  --holiday: #c0262d; --holiday-soft: #fdecec; --blue: #2563eb; --blue-soft: #e8efff;
+  --alm-bg: #fbf6ec; --alm-line: #efe2c6; --alm-ink: #8a5a12; --on-accent: #fff;
+  color-scheme: light;
+}
+[data-theme="latte"] {
+  --bg: #f6f0e8; --card: #fffdf9; --ink: #3b2f27; --muted: #8b7b6d; --line: #eadfd2;
+  --accent: #b5704a; --accent-soft: #f6e6db; --warn: #b4532a; --warn-soft: #fbe9df;
+  --holiday: #b83a3a; --holiday-soft: #f9e3e1; --blue: #4f6d8a; --blue-soft: #e6edf3;
+  --alm-bg: #f3e7d6; --alm-line: #e3cfb4; --alm-ink: #7a4a22;
+}
+[data-theme="ocean"] {
+  --bg: #eef3f9; --card: #ffffff; --ink: #172338; --muted: #64748b; --line: #dbe4ef;
+  --accent: #2563a8; --accent-soft: #e2ecf8; --warn: #d9480f; --warn-soft: #fff0e6;
+  --holiday: #d0313b; --holiday-soft: #fde8ea; --blue: #0e7490; --blue-soft: #e0f4f8;
+  --alm-bg: #fff8e6; --alm-line: #f1e2b8; --alm-ink: #8a6212;
+}
+[data-theme="sakura"] {
+  --bg: #fbf3f5; --card: #ffffff; --ink: #3a2a33; --muted: #8e7a85; --line: #f0dfe5;
+  --accent: #c4577d; --accent-soft: #fbe6ee; --warn: #c2410c; --warn-soft: #fff0e6;
+  --holiday: #b8233a; --holiday-soft: #fde4e8; --blue: #6b5fb5; --blue-soft: #eeebfa;
+  --alm-bg: #fdf5ea; --alm-line: #f2e1c8; --alm-ink: #8a5a24;
+}
+[data-theme="night"] {
+  --bg: #11161d; --card: #1a212b; --ink: #e6ebf1; --muted: #8c99a8; --line: #2a3442;
+  --accent: #4fc3a1; --accent-soft: #1d3a33; --warn: #ff9a5c; --warn-soft: #3a2619;
+  --holiday: #ff6b6b; --holiday-soft: #3d1f22; --blue: #7aa7ff; --blue-soft: #1c2a44;
+  --alm-bg: #2a2418; --alm-line: #4a3e26; --alm-ink: #f0c674; --on-accent: #0f1a17;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --bg: #11161d; --card: #1a212b; --ink: #e6ebf1; --muted: #8c99a8; --line: #2a3442;
+    --accent: #4fc3a1; --accent-soft: #1d3a33; --warn: #ff9a5c; --warn-soft: #3a2619;
+    --holiday: #ff6b6b; --holiday-soft: #3d1f22; --blue: #7aa7ff; --blue-soft: #1c2a44;
+    --alm-bg: #2a2418; --alm-line: #4a3e26; --alm-ink: #f0c674; --on-accent: #0f1a17;
+    color-scheme: dark;
+  }
+}
+

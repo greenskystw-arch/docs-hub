@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+// 自訂分類（單層）
+model Category {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  color     String     @default("accent")
+  sort      Int        @default(0)
+  createdAt DateTime   @default(now())
+  documents Document[]
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  documents Document[]
+}
+
+// Markdown 文件
+model Document {
+  id         String    @id @default(cuid())
+  title      String
+  content    String    @default("")
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags       Tag[]
+  pinned     Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([updatedAt])
+}
