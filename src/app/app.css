@@ -156,7 +156,7 @@ input:focus, select:focus { outline: 2px solid var(--accent-soft); border-color:
 .ed-panes textarea { border: 0; border-radius: 0; resize: vertical; min-height: 62vh; width: 100%; padding: 16px 18px; font-family: ui-monospace, Consolas, "Cascadia Code", "Microsoft JhengHei", monospace; font-size: 14px; line-height: 1.7; outline: none; tab-size: 2; }
 .ed-panes .md { padding: 16px 20px; border-left: 1px solid var(--line); overflow: auto; max-height: 80vh; }
 .ed-panes.preview .md { border-left: 0; max-height: none; min-height: 62vh; }
-.ed-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ed-status { margin-top: -6px; }
 @media (max-width: 760px) {
   .ed-panes { grid-template-columns: 1fr; }
   .ed-panes.split .md { display: none; }

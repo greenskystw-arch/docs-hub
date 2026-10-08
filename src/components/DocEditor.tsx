@@ -205,6 +205,22 @@ export function DocEditor({
           maxLength={200}
           autoFocus={!initial.id}
         />
+        <div className="doc-actions">
+          <Link href={saved.id ? `/docs/${saved.id}` : "/"} className="btn plain">
+            {saved.id ? "返回檢視" : "取消"}
+          </Link>
+          <button type="button" className="btn ghost" disabled={pending} onClick={() => save(false)}>
+            儲存
+          </button>
+          <button type="button" className="btn" disabled={pending} onClick={() => save(true)}>
+            {pending ? "儲存中…" : "儲存並檢視"}
+          </button>
+        </div>
+      </div>
+      <div className="ed-status note">
+        {error ? <span className="error">{error}</span> : dirty ? "● 尚未儲存（Ctrl+S 儲存）" : initial.id || saved.id ? "✓ 已儲存" : ""}
+        {" · "}
+        {content.length.toLocaleString()} 字元
       </div>
 
       <div className="ed-meta">
@@ -285,24 +301,6 @@ export function DocEditor({
         </div>
       </div>
 
-      <div className="ed-foot">
-        <span className="note">
-          {error ? <span className="error">{error}</span> : dirty ? "● 尚未儲存（Ctrl+S 儲存）" : initial.id || saved.id ? "✓ 已儲存" : ""}
-          {" · "}
-          {content.length.toLocaleString()} 字元
-        </span>
-        <div className="doc-actions">
-          <Link href={saved.id ? `/docs/${saved.id}` : "/"} className="btn plain">
-            {saved.id ? "返回檢視" : "取消"}
-          </Link>
-          <button type="button" className="btn ghost" disabled={pending} onClick={() => save(false)}>
-            儲存
-          </button>
-          <button type="button" className="btn" disabled={pending} onClick={() => save(true)}>
-            {pending ? "儲存中…" : "儲存並檢視"}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
