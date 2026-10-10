@@ -20,7 +20,7 @@
     --accent: #1a5fb4; --accent-soft: #eef3fa; color-scheme: light;
   }
   body { background: #fff; font-size: 12pt; }
-  header.top, .back, .doc-actions, .share-foot, .toast, nextjs-portal { display: none !important; }
+  header.top, .view-top, .doc-actions, .share-foot, .toast, nextjs-portal { display: none !important; }
   .shell { padding: 0; }
   .doc-view > .card, .card { border: 0; padding: 0 !important; border-radius: 0; box-shadow: none; }
   .doc-head h1 { font-size: 20pt; }

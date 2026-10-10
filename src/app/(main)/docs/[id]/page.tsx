@@ -13,9 +13,15 @@ export default async function DocPage({ params }: PageProps<"/docs/[id]">) {
 
   return (
     <div className="doc-view">
-      <Link href={doc.category ? `/?cat=${doc.category.id}` : "/"} className="back">
-        ← {doc.category ? doc.category.name : "全部文件"}
-      </Link>
+      <div className="view-top">
+        <Link href={doc.category ? `/?cat=${doc.category.id}` : "/"} className="back">
+          ← {doc.category ? doc.category.name : "全部文件"}
+        </Link>
+        {/* 直接新增，預設放在同一個分類 */}
+        <Link href={doc.category ? `/docs/new?cat=${doc.category.id}` : "/docs/new"} className="btn small">
+          ＋ 新文件
+        </Link>
+      </div>
       <article className="card">
         <div className="doc-head">
           <h1>{doc.pinned && <span className="pin">📌 </span>}{doc.title}</h1>

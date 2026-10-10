@@ -107,7 +107,8 @@ input:focus, select:focus { outline: 2px solid var(--accent-soft); border-color:
 .doc-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin: 10px 0 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .doc-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 @media (max-width: 600px) { .doc-view > .card { padding: 18px 16px; } .doc-head h1 { font-size: 22px; } }
-.back { display: inline-block; font-size: 13px; color: var(--muted); text-decoration: none; margin-bottom: 10px; }
+.view-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.back { display: inline-block; font-size: 13px; color: var(--muted); text-decoration: none; }
 .back:hover { color: var(--accent); }
 
 /* ===== Markdown 內容 ===== */
