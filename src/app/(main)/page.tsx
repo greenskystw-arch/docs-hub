@@ -3,6 +3,9 @@ import { countDocs, loadCategories, loadDocuments, loadTags, normalizeSort, type
 import { colorHex } from "@/lib/colors";
 import { buildTree, pathOf, PATH_SEP } from "@/lib/categoryTree";
 import { CategoryTree } from "@/components/CategoryTree";
+import { SidebarResizer } from "@/components/SidebarResizer";
+import { clampSide, SIDE_COOKIE, SIDE_DEFAULT } from "@/lib/sidebar";
+import { cookies } from "next/headers";
 import { excerpt, formatDate, formatDay } from "@/lib/text";
 
 type Params = { cat?: string; tag?: string; q?: string; sort?: string; dir?: string };
@@ -49,10 +52,12 @@ export default async function LibraryPage({ searchParams }: PageProps<"/">) {
   // 預設展開目前分類的上層路徑（含自己，方便看到它的子分類）
   const openIds = pathOf(cats, f.cat ?? null).map((c) => c.id);
   const catPath = (id: string | null) => pathOf(cats, id).map((c) => c.name).join(PATH_SEP);
+  const sideW = clampSide((await cookies()).get(SIDE_COOKIE)?.value ?? SIDE_DEFAULT);
 
   return (
-    <div className="lib">
+    <div className="lib" style={{ "--side-w": `${sideW}px` } as React.CSSProperties}>
       <aside className="card side">
+        <SidebarResizer />
         <h3>分類 <Link href="/categories">管理</Link></h3>
         <div className="side-list">
           <Link href={href(f, { cat: undefined })} className={!f.cat ? "on" : undefined}>

@@ -44,7 +44,7 @@ export function CategoryTree({ roots, current, hrefs, openIds }: Props) {
             ) : (
               <span className="tree-twist" />
             )}
-            <Link href={hrefs[n.id]}>
+            <Link href={hrefs[n.id]} title={n.name}>
               <span className="dot" style={{ "--c": colorHex(n.color) } as React.CSSProperties} />
               <span className="nm">{n.name}</span>
               <small>{n.total}</small>

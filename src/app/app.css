@@ -48,11 +48,11 @@ input:focus, select:focus { outline: 2px solid var(--accent-soft); border-color:
 .pin { color: var(--warn); font-size: 12px; }
 
 /* ===== 文件庫 ===== */
-.lib { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items: start; }
+.lib { display: grid; grid-template-columns: var(--side-w, 240px) minmax(0, 1fr); gap: 16px; align-items: start; }
 .side { position: sticky; top: 16px; padding: 12px; }
 .side h3 { font-size: 12px; color: var(--muted); font-weight: 500; margin: 6px 8px; display: flex; justify-content: space-between; align-items: center; }
 .side h3 a { font-size: 12px; text-decoration: none; }
-.side-list { display: grid; gap: 1px; }
+.side-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
 .side-list a { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 14px; }
 .side-list a:hover { background: var(--bg); }
 .side-list a.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
@@ -209,4 +209,19 @@ button.tree-twist:hover { color: var(--ink); }
 .mgr-edit select { max-width: 260px; }
 @media (max-width: 760px) {
   .side-list { display: grid; overflow: visible; }
+}
+
+/* ===== 側欄寬度調整 / 長名稱截斷 ===== */
+.side { min-width: 0; }
+.tree-item, .tree-row { min-width: 0; }
+.side-list small { flex: none; margin-left: 4px; }
+.side-resizer { position: absolute; top: 12px; bottom: 12px; right: -11px; width: 14px; cursor: col-resize; z-index: 5; touch-action: none; }
+.side-resizer::after { content: ""; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: transparent; transition: background .15s; }
+.side-resizer:hover::after, .side-resizer:focus-visible::after, body.resizing .side-resizer::after { background: var(--accent); }
+.side-resizer:focus { outline: none; }
+body.resizing { cursor: col-resize; user-select: none; }
+.doc-cols .c-cat .cat { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+@media (max-width: 760px) {
+  .lib { grid-template-columns: minmax(0, 1fr); }
+  .side-resizer { display: none; }
 }
