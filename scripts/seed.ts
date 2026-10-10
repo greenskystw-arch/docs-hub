@@ -45,7 +45,8 @@ async function main() {
     { name: "生活", color: "green" },
   ];
   for (const [i, c] of names.entries()) {
-    await prisma.category.upsert({ where: { name: c.name }, create: { ...c, sort: i }, update: {} });
+    const exists = await prisma.category.findFirst({ where: { name: c.name, parentId: null } });
+    if (!exists) await prisma.category.create({ data: { ...c, sort: i } });
   }
   if ((await prisma.document.count()) === 0) {
     await prisma.document.create({

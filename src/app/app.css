@@ -74,7 +74,7 @@ input:focus, select:focus { outline: 2px solid var(--accent-soft); border-color:
 .doc-row .meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
 .doc-row .meta { margin-top: 2px; }
 /* 欄位：標題 | 分類 | 建立日期 | 最後更新 */
-.doc-cols { display: grid; grid-template-columns: minmax(0, 1fr) 110px 110px 150px; gap: 14px; align-items: center; }
+.doc-cols { display: grid; grid-template-columns: minmax(0, 1fr) 120px 110px 150px; gap: 14px; align-items: center; }
 .doc-cols .c-cat { min-width: 0; overflow: hidden; }
 .doc-cols .c-date { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .doc-cols .c-date small { display: none; }
@@ -192,3 +192,21 @@ input:focus, select:focus { outline: 2px solid var(--accent-soft); border-color:
 .login form { width: 100%; max-width: 360px; display: grid; gap: 12px; }
 .login h1 { font-size: 20px; text-align: center; margin: 0 0 4px; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 13px; z-index: 50; }
+
+/* ===== 分類樹 ===== */
+.tree-row { display: flex; align-items: center; border-radius: 8px; }
+.tree-row:hover { background: var(--bg); }
+.tree-row.on { background: var(--accent-soft); }
+.tree-row.on a { color: var(--accent); font-weight: 600; }
+.tree-row a { flex: 1; min-width: 0; padding-left: 2px !important; }
+.tree-row a:hover { background: none !important; }
+.tree-twist { width: 18px; flex: none; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0; text-align: center; }
+button.tree-twist:hover { color: var(--ink); }
+.crumbs { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.crumbs .sep { color: var(--muted); margin-right: 4px; }
+.mgr-row .branch { color: var(--muted); margin-right: -2px; }
+.mgr-edit label { display: inline-flex; align-items: center; gap: 6px; }
+.mgr-edit select { max-width: 260px; }
+@media (max-width: 760px) {
+  .side-list { display: grid; overflow: visible; }
+}

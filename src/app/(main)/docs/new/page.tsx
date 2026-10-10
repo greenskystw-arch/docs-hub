@@ -1,5 +1,6 @@
 import { DocEditor } from "@/components/DocEditor";
 import { loadCategories, loadTags } from "@/lib/data";
+import { categoryOptions } from "@/lib/categoryTree";
 
 export default async function NewDocPage({ searchParams }: PageProps<"/docs/new">) {
   const sp = await searchParams;
@@ -9,7 +10,7 @@ export default async function NewDocPage({ searchParams }: PageProps<"/docs/new"
   return (
     <DocEditor
       initial={{ title: "", content: "", categoryId: cat, tags: "", pinned: false }}
-      categories={cats.map((c) => ({ id: c.id, name: c.name }))}
+      categories={categoryOptions(cats)}
       tagNames={tags.map((t) => t.name)}
     />
   );

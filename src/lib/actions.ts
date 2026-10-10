@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { isThemeId } from "@/lib/themes";
 import { isCategoryColor } from "@/lib/colors";
 import { parseTags } from "@/lib/text";
+import { depthOf, heightOf, MAX_DEPTH, subtreeIds } from "@/lib/categoryTree";
 
 async function requireUser() {
   const session = await auth();
@@ -110,53 +111,115 @@ export async function disableShare(id: string) {
   refresh();
 }
 
-/* ===== 分類 ===== */
+/* ===== 分類（樹狀，最多 MAX_DEPTH 層） ===== */
 
-export async function createCategory(name: string, color: string): Promise<{ error?: string }> {
+async function allCats() {
+  return prisma.category.findMany({
+    select: { id: true, name: true, parentId: true, sort: true },
+    orderBy: [{ sort: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+// 同一層（同一個上層）內不可重名
+function nameTaken(list: { id: string; name: string; parentId: string | null }[], name: string, parentId: string | null, selfId?: string) {
+  return list.some((c) => c.parentId === parentId && c.name === name && c.id !== selfId);
+}
+
+export async function createCategory(name: string, color: string, parentId: string | null): Promise<{ error?: string }> {
   await requireUser();
   const clean = name.trim().slice(0, 30);
   if (!clean) return { error: "請輸入分類名稱" };
-  if (await prisma.category.findUnique({ where: { name: clean } })) return { error: "已有同名分類" };
-  const max = await prisma.category.aggregate({ _max: { sort: true } });
+  const list = await allCats();
+  const parent = parentId ? list.find((c) => c.id === parentId) : undefined;
+  if (parentId && !parent) return { error: "找不到上層分類" };
+  if (parent && depthOf(list, parent.id) >= MAX_DEPTH) return { error: `分類最多 ${MAX_DEPTH} 層` };
+  if (nameTaken(list, clean, parent?.id ?? null)) return { error: "同一層已有同名分類" };
+  const siblings = list.filter((c) => c.parentId === (parent?.id ?? null));
   await prisma.category.create({
-    data: { name: clean, color: isCategoryColor(color) ? color : "green", sort: (max._max.sort ?? 0) + 1 },
+    data: {
+      name: clean,
+      color: isCategoryColor(color) ? color : "green",
+      parentId: parent?.id ?? null,
+      sort: siblings.length ? Math.max(...siblings.map((c) => c.sort)) + 1 : 0,
+    },
   });
   refresh();
   return {};
 }
 
-export async function updateCategory(id: string, name: string, color: string): Promise<{ error?: string }> {
+// 改名、換色、移到其他上層（不可移到自己底下，也不可超過層數上限）
+export async function updateCategory(
+  id: string,
+  name: string,
+  color: string,
+  parentId: string | null,
+): Promise<{ error?: string }> {
   await requireUser();
   const clean = name.trim().slice(0, 30);
   if (!clean) return { error: "請輸入分類名稱" };
-  const dup = await prisma.category.findUnique({ where: { name: clean } });
-  if (dup && dup.id !== id) return { error: "已有同名分類" };
+  const list = await allCats();
+  const self = list.find((c) => c.id === id);
+  if (!self) return { error: "找不到分類" };
+  const newParent = parentId ? list.find((c) => c.id === parentId) : undefined;
+  if (parentId && !newParent) return { error: "找不到上層分類" };
+  if (newParent && subtreeIds(list, id).includes(newParent.id)) return { error: "不能移到自己或自己的子分類底下" };
+  const parentDepth = newParent ? depthOf(list, newParent.id) : 0;
+  if (parentDepth + heightOf(list, id) > MAX_DEPTH) return { error: `移過去會超過 ${MAX_DEPTH} 層` };
+  if (nameTaken(list, clean, newParent?.id ?? null, id)) return { error: "同一層已有同名分類" };
+
+  const moved = (newParent?.id ?? null) !== self.parentId;
+  const siblings = list.filter((c) => c.parentId === (newParent?.id ?? null) && c.id !== id);
   await prisma.category.update({
     where: { id },
-    data: { name: clean, ...(isCategoryColor(color) ? { color } : {}) },
+    data: {
+      name: clean,
+      ...(isCategoryColor(color) ? { color } : {}),
+      parentId: newParent?.id ?? null,
+      // 換到新的上層時排在最後
+      ...(moved ? { sort: siblings.length ? Math.max(...siblings.map((c) => c.sort)) + 1 : 0 } : {}),
+    },
   });
   refresh();
   return {};
 }
 
+// 在同一層內上下移動
 export async function moveCategory(id: string, dir: -1 | 1) {
   await requireUser();
-  const list = await prisma.category.findMany({ orderBy: [{ sort: "asc" }, { createdAt: "asc" }] });
-  const i = list.findIndex((c) => c.id === id);
+  const list = await allCats();
+  const self = list.find((c) => c.id === id);
+  if (!self) return;
+  const siblings = list.filter((c) => c.parentId === self.parentId);
+  const i = siblings.findIndex((c) => c.id === id);
   const j = i + dir;
-  if (i < 0 || j < 0 || j >= list.length) return;
-  [list[i], list[j]] = [list[j], list[i]];
+  if (j < 0 || j >= siblings.length) return;
+  [siblings[i], siblings[j]] = [siblings[j], siblings[i]];
   await prisma.$transaction(
-    list.map((c, idx) => prisma.category.update({ where: { id: c.id }, data: { sort: idx } })),
+    siblings.map((c, idx) => prisma.category.update({ where: { id: c.id }, data: { sort: idx } })),
   );
   refresh();
 }
 
-// 刪除分類：文件不會刪，變成「未分類」
-export async function deleteCategory(id: string) {
+// 刪除分類：子分類與文件往上移一層（第一層的文件變成「未分類」），不會刪掉任何文件
+export async function deleteCategory(id: string): Promise<{ error?: string }> {
   await requireUser();
-  await prisma.category.delete({ where: { id } });
+  const list = await allCats();
+  const self = list.find((c) => c.id === id);
+  if (!self) return {};
+  const children = list.filter((c) => c.parentId === id);
+  const others = list.filter((c) => c.id !== id);
+  const clash = children.find((ch) => nameTaken(others, ch.name, self.parentId));
+  if (clash) return { error: `上一層已有「${clash.name}」，請先把子分類改名或移走` };
+  const base = Math.max(-1, ...others.filter((c) => c.parentId === self.parentId).map((c) => c.sort)) + 1;
+  await prisma.$transaction([
+    ...children.map((ch, i) =>
+      prisma.category.update({ where: { id: ch.id }, data: { parentId: self.parentId, sort: base + i } }),
+    ),
+    prisma.document.updateMany({ where: { categoryId: id }, data: { categoryId: self.parentId } }),
+    prisma.category.delete({ where: { id } }),
+  ]);
   refresh();
+  return {};
 }
 
 /* ===== 標籤 ===== */

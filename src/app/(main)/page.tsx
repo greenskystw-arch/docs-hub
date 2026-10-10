@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { countDocs, loadCategories, loadDocuments, loadTags, normalizeSort, type SortField } from "@/lib/data";
 import { colorHex } from "@/lib/colors";
+import { buildTree, pathOf, PATH_SEP } from "@/lib/categoryTree";
+import { CategoryTree } from "@/components/CategoryTree";
 import { excerpt, formatDate, formatDay } from "@/lib/text";
 
 type Params = { cat?: string; tag?: string; q?: string; sort?: string; dir?: string };
@@ -38,9 +40,15 @@ function SortHead({ f, field, label, className }: { f: Params; field: SortField;
 export default async function LibraryPage({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
   const f: Params = { cat: one(sp.cat), tag: one(sp.tag), q: one(sp.q), sort: one(sp.sort), dir: one(sp.dir) };
-  const [docs, cats, tags, counts] = await Promise.all([loadDocuments(f), loadCategories(), loadTags(), countDocs()]);
+  const cats = await loadCategories();
+  const [docs, tags, counts] = await Promise.all([loadDocuments(f, cats), loadTags(), countDocs()]);
   const curCat = cats.find((c) => c.id === f.cat);
   const newHref = curCat ? `/docs/new?cat=${curCat.id}` : "/docs/new";
+  const roots = buildTree(cats);
+  const hrefs = Object.fromEntries(cats.map((c) => [c.id, href(f, { cat: c.id })]));
+  // 預設展開目前分類的上層路徑（含自己，方便看到它的子分類）
+  const openIds = pathOf(cats, f.cat ?? null).map((c) => c.id);
+  const catPath = (id: string | null) => pathOf(cats, id).map((c) => c.name).join(PATH_SEP);
 
   return (
     <div className="lib">
@@ -50,13 +58,7 @@ export default async function LibraryPage({ searchParams }: PageProps<"/">) {
           <Link href={href(f, { cat: undefined })} className={!f.cat ? "on" : undefined}>
             <span>📚</span><span className="nm">全部</span><small>{counts.all}</small>
           </Link>
-          {cats.map((c) => (
-            <Link key={c.id} href={href(f, { cat: c.id })} className={f.cat === c.id ? "on" : undefined}>
-              <span className="dot" style={{ "--c": colorHex(c.color) } as React.CSSProperties} />
-              <span className="nm">{c.name}</span>
-              <small>{c._count.documents}</small>
-            </Link>
-          ))}
+          <CategoryTree roots={roots} current={f.cat} hrefs={hrefs} openIds={openIds} />
           <Link href={href(f, { cat: "none" })} className={f.cat === "none" ? "on" : undefined}>
             <span className="dot" style={{ "--c": "var(--line)" } as React.CSSProperties} />
             <span className="nm">未分類</span><small>{counts.none}</small>
@@ -136,7 +138,11 @@ export default async function LibraryPage({ searchParams }: PageProps<"/">) {
                 </div>
                 <div className="c-cat">
                   {d.category ? (
-                    <span className="cat" style={{ "--c": colorHex(d.category.color) } as React.CSSProperties}>
+                    <span
+                      className="cat"
+                      style={{ "--c": colorHex(d.category.color) } as React.CSSProperties}
+                      title={catPath(d.category.id)}
+                    >
                       {d.category.name}
                     </span>
                   ) : (

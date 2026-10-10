@@ -2,14 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DocActions } from "@/components/DocActions";
 import { Markdown } from "@/components/Markdown";
-import { loadDocument } from "@/lib/data";
+import { loadCategories, loadDocument } from "@/lib/data";
+import { pathOf } from "@/lib/categoryTree";
 import { colorHex } from "@/lib/colors";
 import { formatDate } from "@/lib/text";
 
 export default async function DocPage({ params }: PageProps<"/docs/[id]">) {
   const { id } = await params;
-  const doc = await loadDocument(id);
+  const [doc, cats] = await Promise.all([loadDocument(id), loadCategories()]);
   if (!doc) notFound();
+  const path = pathOf(cats, doc.categoryId);
 
   return (
     <div className="doc-view">
@@ -28,10 +30,17 @@ export default async function DocPage({ params }: PageProps<"/docs/[id]">) {
           <DocActions id={doc.id} title={doc.title} pinned={doc.pinned} markdown={doc.content} shareToken={doc.shareToken} />
         </div>
         <div className="doc-meta">
-          {doc.category ? (
-            <Link href={`/?cat=${doc.category.id}`} className="cat" style={{ "--c": colorHex(doc.category.color) } as React.CSSProperties}>
-              {doc.category.name}
-            </Link>
+          {path.length ? (
+            <span className="crumbs">
+              {path.map((c, i) => (
+                <span key={c.id}>
+                  {i > 0 && <span className="sep">›</span>}
+                  <Link href={`/?cat=${c.id}`} className="cat" style={{ "--c": colorHex(c.color) } as React.CSSProperties}>
+                    {c.name}
+                  </Link>
+                </span>
+              ))}
+            </span>
           ) : (
             <span>未分類</span>
           )}

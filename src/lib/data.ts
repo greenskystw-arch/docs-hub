@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isThemeId, type ThemeId } from "@/lib/themes";
+import { subtreeIds, type FlatCat } from "@/lib/categoryTree";
 
 export async function getTheme(): Promise<ThemeId> {
   await connection();
@@ -9,12 +10,21 @@ export async function getTheme(): Promise<ThemeId> {
   return isThemeId(value) ? value : "auto";
 }
 
-export async function loadCategories() {
+// 所有分類（攤平），用 buildTree() 組成樹
+export async function loadCategories(): Promise<FlatCat[]> {
   await connection();
-  return prisma.category.findMany({
+  const rows = await prisma.category.findMany({
     orderBy: [{ sort: "asc" }, { createdAt: "asc" }],
     include: { _count: { select: { documents: true } } },
   });
+  return rows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    color: c.color,
+    sort: c.sort,
+    parentId: c.parentId,
+    count: c._count.documents,
+  }));
 }
 
 export async function loadTags() {
@@ -37,14 +47,19 @@ export function normalizeSort(sort?: string, dir?: string): { field: SortField; 
   return { field, dir: d };
 }
 
-export async function loadDocuments(f: DocFilter) {
+// cats：已載入的分類，選上層分類時一併列出所有子分類的文件
+export async function loadDocuments(f: DocFilter, cats: FlatCat[]) {
   await connection();
   const q = f.q?.trim();
   const s = normalizeSort(f.sort, f.dir);
   const key = s.field === "created" ? "createdAt" : s.field === "title" ? "title" : "updatedAt";
   return prisma.document.findMany({
     where: {
-      ...(f.cat === "none" ? { categoryId: null } : f.cat ? { categoryId: f.cat } : {}),
+      ...(f.cat === "none"
+        ? { categoryId: null }
+        : f.cat
+          ? { categoryId: { in: subtreeIds(cats, f.cat) } }
+          : {}),
       ...(f.tag ? { tags: { some: { name: f.tag } } } : {}),
       ...(q ? { OR: [{ title: { contains: q } }, { content: { contains: q } }] } : {}),
     },

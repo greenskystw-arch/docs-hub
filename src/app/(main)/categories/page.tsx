@@ -6,12 +6,10 @@ export default async function CategoriesPage() {
   const [cats, tags] = await Promise.all([loadCategories(), loadTags()]);
 
   return (
-    <div style={{ maxWidth: 760, margin: "0 auto" }}>
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <section className="card">
-        <h2>分類 <small>每份文件屬於一個分類；刪除分類不會刪除文件</small></h2>
-        <CategoryManager
-          categories={cats.map((c) => ({ id: c.id, name: c.name, color: c.color, count: c._count.documents }))}
-        />
+        <h2>分類 <small>最多三層（例：學習 › 課程 › 章節）；刪除分類不會刪除文件</small></h2>
+        <CategoryManager categories={cats} />
       </section>
       <section className="card">
         <h2>標籤 <small>一份文件可有多個標籤；沒有文件使用的標籤會自動移除</small></h2>
